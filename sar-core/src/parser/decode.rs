@@ -14,8 +14,8 @@ pub fn decompress(bytes: &mut [u8]) -> Result<Box<[u8]>> {
     let cipher = BlowfishLE::new_from_slice(KEY).unwrap();
     // decrypt the maximum multiple of 8 bytes
     for block in bytes.chunks_exact_mut(8) {
-        let mut block = GenericArray::from_mut_slice(block);
-        cipher.decrypt_block(&mut block);
+        let block = GenericArray::from_mut_slice(block);
+        cipher.decrypt_block(block);
     }
     // XOR every byte in the buffer with 0x95
     bytes.iter_mut().for_each(|b| *b ^= 0x95);

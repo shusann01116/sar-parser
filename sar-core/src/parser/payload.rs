@@ -17,7 +17,7 @@ fn get_body(mut bytes: Box<[u8]>) -> Result<Box<[u8]>> {
     let (_, body) = bytes.split_at_mut(4);
 
     match compression {
-        Compression::None => Ok(Box::from(<&[u8] as Into<Box<[u8]>>>::into(body))),
+        Compression::None => Ok(Box::from(body)),
         Compression::Compressed => decode::decompress(body),
     }
 }
@@ -38,7 +38,7 @@ impl Payload {
     pub fn parse(bytes: &[u8]) -> Result<Self> {
         let header = Header::parse(&bytes[0..std::mem::size_of::<Header>()])?;
         let layers = Layers::parse(&bytes[std::mem::size_of::<Header>()..])?.into();
-        let name = Self::parse_name(&bytes, &header)?;
+        let name = Self::parse_name(bytes, &header)?;
 
         Ok(Self {
             header,
@@ -52,7 +52,6 @@ impl Payload {
         let size_of_header = std::mem::size_of::<Header>();
         let size_of_layer = std::mem::size_of::<Layer>();
         let start = size_of_header + size_of_layer * header.layers() as usize;
-        dbg!(&start);
 
         let name_bytes = bytes[start..]
             .chunks_exact(2)
