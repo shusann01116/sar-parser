@@ -1,5 +1,3 @@
-use crate::parser::payload::Payload;
-
 /// Represents a position in 2D space
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Position {

@@ -1,7 +1,7 @@
-use std::{collections::HashMap, sync::Arc};
+use std::collections::HashMap;
 
 use crate::core::result::Result;
-use image::{DynamicImage, ImageBuffer, Rgb, SubImage};
+use image::{imageops, DynamicImage, SubImage};
 
 use crate::core::symbol::SymbolId;
 
@@ -21,32 +21,32 @@ enum ImageSheet {
     Color,
 }
 
-struct Resource {
-    sheets: HashMap<ImageSheet, Arc<DynamicImage>>,
+pub struct Resource {
+    sheets: HashMap<ImageSheet, DynamicImage>,
 }
 
 impl Resource {
-    fn new() -> Result<Self> {
+    pub fn new() -> Result<Self> {
         let r = image::load_from_memory(SYMBOLS_R)?;
         let g = image::load_from_memory(SYMBOLS_G)?;
         let b = image::load_from_memory(SYMBOLS_B)?;
         let color = image::load_from_memory(SYMBOLS_COLOR)?;
 
         let mut sheets = HashMap::new();
-        sheets.insert(ImageSheet::R, Arc::new(r));
-        sheets.insert(ImageSheet::G, Arc::new(g));
-        sheets.insert(ImageSheet::B, Arc::new(b));
-        sheets.insert(ImageSheet::Color, Arc::new(color));
+        sheets.insert(ImageSheet::R, r);
+        sheets.insert(ImageSheet::G, g);
+        sheets.insert(ImageSheet::B, b);
+        sheets.insert(ImageSheet::Color, color);
 
         Ok(Self { sheets })
     }
 
-    fn get_image(&self, id: &SymbolId) -> Option<Arc<DynamicImage>> {
+    pub fn get_image(&self, id: &SymbolId) -> Option<SubImage<&DynamicImage>> {
         let index = ImageIndex::get(id)?;
         let sheet = self.sheets.get(&index.sheet)?;
         let (x, y, width, height) = Self::get_coordinates(&index);
-        let image = sheet.crop_imm(x, y, width, height);
-        Some(Arc::new(image))
+        let image = imageops::crop_imm(sheet, x, y, width, height);
+        Some(image)
     }
 
     fn get_coordinates(index: &ImageIndex) -> (u32, u32, u32, u32) {
@@ -62,7 +62,7 @@ struct ImageIndex {
 }
 
 impl ImageIndex {
-    pub fn get(id: &SymbolId) -> Option<Self> {
+    fn get(id: &SymbolId) -> Option<Self> {
         match id.id() {
             id @ 1..=80 => Some(Self {
                 sheet: ImageSheet::R,
@@ -101,6 +101,8 @@ impl ImageIndex {
 
 #[cfg(test)]
 mod test {
+    use image::GenericImageView;
+
     use super::*;
 
     #[test]
@@ -113,7 +115,10 @@ mod test {
     fn test_get_image() {
         let resource = Resource::new().unwrap();
         let image = resource.get_image(&SymbolId::new(40)).unwrap();
+        let image2 = resource.get_image(&SymbolId::new(41)).unwrap();
         assert_eq!(image.width(), SYMBOL_PIXELS);
         assert_eq!(image.height(), SYMBOL_PIXELS);
+        assert_eq!(image2.width(), SYMBOL_PIXELS);
+        assert_eq!(image2.height(), SYMBOL_PIXELS);
     }
 }

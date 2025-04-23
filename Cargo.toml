@@ -1,5 +1,5 @@
 [workspace]
-members = ["sar-parser"]
+members = ["sar-core"]
 resolver = "2"
 
 [workspace.dependencies]
