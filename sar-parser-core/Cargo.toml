@@ -1,0 +1,9 @@
+[package]
+name = "sar-parser-core"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ages-prs = { workspace = true }
+blowfish = { workspace = true }
+thiserror = { workspace = true }
