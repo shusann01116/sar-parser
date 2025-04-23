@@ -1,12 +1,15 @@
 use crate::{
-    core::{result::Result, sa::SymbolArt},
+    core::{
+        result::Result,
+        sa::{SymbolArt, SymbolArtLayer},
+    },
     parser::decode::{self, Compression},
 };
 
 use super::inner::{Header, Layer, Layers};
 
 /// Parses a byte array into a Payload structure
-pub fn parse(bytes: Box<[u8]>) -> Result<Payload> {
+pub fn parse(bytes: Box<[u8]>) -> Result<impl SymbolArt<Layer>> {
     let body = get_body(bytes)?;
     Payload::parse(&body)
 }

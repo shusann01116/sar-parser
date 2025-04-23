@@ -10,4 +10,6 @@ pub enum SARError {
     SymbolNotFound,
     #[error(transparent)]
     ImageError(#[from] image::ImageError),
+    #[error("Projection error")]
+    ProjectionError,
 }

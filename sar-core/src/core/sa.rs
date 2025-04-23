@@ -1,3 +1,5 @@
+use imageproc::geometric_transformations::Projection;
+
 use super::symbol::Symbol;
 
 /// Represents a position in 2D space

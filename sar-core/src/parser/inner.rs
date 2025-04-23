@@ -1,5 +1,5 @@
 use crate::core::{
-    result::Result,
+    result::{Result, SARError},
     sa::{self, Position, SymbolArtLayer},
     symbol,
 };
@@ -61,7 +61,7 @@ impl From<Layers> for Vec<Layer> {
 
 /// Represents a single layer in a SAR file
 #[derive(Debug, Clone, PartialEq)]
-pub(super) struct Layer {
+pub struct Layer {
     /// Top-left position of the layer
     pub(super) top_left: Position,
     /// Bottom-left position of the layer
@@ -170,6 +170,31 @@ impl SymbolArtLayer for Layer {
 
     fn color(&self) -> sa::Color {
         sa::Color::new(self.alpha, self.color_r, self.color_g, self.color_b)
+    }
+}
+
+impl TryFrom<&Layer> for imageproc::geometric_transformations::Projection {
+    type Error = SARError;
+
+    fn try_from(value: &Layer) -> Result<Self> {
+        let top_left = value.top_left();
+        let bottom_left = value.bottom_left();
+        let top_right = value.top_right();
+        let bottom_right = value.bottom_right();
+
+        // TODO: fix projection, because all coordinates are not normalized
+        let projection = imageproc::geometric_transformations::Projection::from_control_points(
+            [(0.0, 0.0), (0.0, 1.0), (1.0, 0.0), (1.0, 1.0)],
+            [
+                (top_left.x as f32 / 128.0, top_left.y as f32 / 128.0),
+                (bottom_left.x as f32 / 128.0, bottom_left.y as f32 / 128.0),
+                (top_right.x as f32 / 128.0, top_right.y as f32 / 128.0),
+                (bottom_right.x as f32 / 128.0, bottom_right.y as f32 / 128.0),
+            ],
+        )
+        .ok_or(SARError::ProjectionError)?;
+
+        Ok(projection)
     }
 }
 
