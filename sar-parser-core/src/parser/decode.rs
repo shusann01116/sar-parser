@@ -1,6 +1,6 @@
 use std::io::{Cursor, Read};
 
-use crate::result::{Result, SARError};
+use crate::core::result::{Result, SARError};
 use ages_prs::ModernPrsDecoder;
 use blowfish::{
     cipher::{generic_array::GenericArray, BlockDecrypt, KeyInit},

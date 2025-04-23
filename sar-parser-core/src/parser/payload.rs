@@ -1,6 +1,6 @@
 use crate::{
-    decode::{self, Compression},
-    result::Result,
+    core::result::Result,
+    parser::decode::{self, Compression},
 };
 
 use super::inner::{Header, Layer, Layers};
@@ -66,7 +66,7 @@ impl Payload {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{core::Position, test::RAW_FILE};
+    use crate::{core::sa::Position, test::RAW_FILE};
 
     #[test]
     fn test_get_body() {

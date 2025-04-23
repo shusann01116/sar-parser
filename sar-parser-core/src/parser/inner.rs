@@ -1,4 +1,4 @@
-use crate::{core::Position, result::Result};
+use crate::{core::result::Result, core::sa::Position};
 
 /// Represents the header of a SAR file containing metadata
 #[derive(Debug, Clone, PartialEq)]
