@@ -1,6 +1,7 @@
 use crate::core::{
     result::Result,
-    sa::{Position, SymbolArtLayer},
+    sa::{self, Position, SymbolArtLayer},
+    symbol,
 };
 
 /// Represents the header of a SAR file containing metadata
@@ -161,6 +162,14 @@ impl SymbolArtLayer for Layer {
 
     fn bottom_right(&self) -> Position {
         self.bottom_right
+    }
+
+    fn symbol(&self) -> symbol::Symbol {
+        symbol::Symbol::new(self.symbol_id.into())
+    }
+
+    fn color(&self) -> sa::Color {
+        sa::Color::new(self.alpha, self.color_r, self.color_g, self.color_b)
     }
 }
 

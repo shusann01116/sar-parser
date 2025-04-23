@@ -11,6 +11,12 @@ impl SymbolId {
     }
 }
 
+impl From<u16> for SymbolId {
+    fn from(id: u16) -> Self {
+        Self(id as u32)
+    }
+}
+
 #[derive(Clone)]
 pub struct Symbol {
     id: SymbolId,

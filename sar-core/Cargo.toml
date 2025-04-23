@@ -8,6 +8,7 @@ ages-prs = { workspace = true }
 blowfish = { workspace = true }
 image = { workspace = true }
 thiserror = { workspace = true }
+imageproc = { workspace = true }
 
 [[example]]
 name = "parse"

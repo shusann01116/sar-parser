@@ -1,3 +1,5 @@
+use super::symbol::Symbol;
+
 /// Represents a position in 2D space
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Position {
@@ -20,14 +22,19 @@ pub trait SymbolArtLayer {
     fn bottom_left(&self) -> Position;
     fn top_right(&self) -> Position;
     fn bottom_right(&self) -> Position;
+    fn symbol(&self) -> Symbol;
+    fn color(&self) -> Color;
 }
 
-#[cfg(test)]
-mod tests {
-    use crate::test::RAW_FILE;
+pub struct Color {
+    pub a: u8,
+    pub r: u8,
+    pub g: u8,
+    pub b: u8,
+}
 
-    use super::*;
-
-    #[test]
-    fn test_symbol_art_format() {}
+impl Color {
+    pub fn new(a: u8, r: u8, g: u8, b: u8) -> Self {
+        Self { a, r, g, b }
+    }
 }
