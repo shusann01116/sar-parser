@@ -1,4 +1,15 @@
-use crate::parser::Position;
+use crate::parser::payload::Payload;
+
+/// Represents a position in 2D space
+#[derive(Debug, Clone, PartialEq)]
+pub struct Position {
+    /// X coordinate
+    pub x: u8,
+    /// Y coordinate
+    pub y: u8,
+}
+
+enum Symbol {}
 
 pub trait SymbolArt<L>
 where
@@ -15,8 +26,6 @@ pub trait SymbolArtLayer {
     fn top_right(&self) -> Position;
     fn bottom_right(&self) -> Position;
 }
-
-enum Symbol {}
 
 #[cfg(test)]
 mod tests {

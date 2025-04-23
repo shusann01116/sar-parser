@@ -7,3 +7,6 @@ edition = "2021"
 ages-prs = { workspace = true }
 blowfish = { workspace = true }
 thiserror = { workspace = true }
+
+[[example]]
+name = "parse"

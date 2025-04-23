@@ -1,6 +1,6 @@
 mod core;
 mod decode;
-mod parser;
+pub mod parser;
 mod result;
 
 #[cfg(test)]
