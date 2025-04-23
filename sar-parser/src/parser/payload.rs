@@ -1,5 +1,5 @@
 use crate::{
-    core::result::Result,
+    core::{result::Result, sa::SymbolArt},
     parser::decode::{self, Compression},
 };
 
@@ -52,6 +52,7 @@ impl Payload {
         let size_of_header = std::mem::size_of::<Header>();
         let size_of_layer = std::mem::size_of::<Layer>();
         let start = size_of_header + size_of_layer * header.layers() as usize;
+        dbg!(&start);
 
         let name_bytes = bytes[start..]
             .chunks_exact(2)
@@ -60,6 +61,16 @@ impl Payload {
             .collect::<Vec<_>>();
 
         Ok(name_bytes)
+    }
+}
+
+impl SymbolArt<Layer> for Payload {
+    fn author_id(&self) -> u32 {
+        self.header.author_id
+    }
+
+    fn layers(&self) -> Vec<Layer> {
+        self.layers.clone()
     }
 }
 
@@ -78,7 +89,8 @@ mod tests {
     #[test]
     fn test_parse() {
         let bytes = Box::from(RAW_FILE);
-        let payload = Payload::parse(&bytes).unwrap();
+        let body = get_body(bytes).unwrap();
+        let payload = Payload::parse(&body).unwrap();
 
         let expected_name = &[12394, 12363, 12383, 12373, 12435]; // "なかたさん"
         let expected = Payload {

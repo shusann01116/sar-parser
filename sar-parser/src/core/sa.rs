@@ -1,7 +1,7 @@
 use crate::parser::payload::Payload;
 
 /// Represents a position in 2D space
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Position {
     /// X coordinate
     pub x: u8,
@@ -15,7 +15,6 @@ where
 {
     fn author_id(&self) -> u32;
     fn layers(&self) -> Vec<L>;
-    fn name(&self) -> String;
 }
 
 pub trait SymbolArtLayer {

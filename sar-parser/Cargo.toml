@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 ages-prs = { workspace = true }
 blowfish = { workspace = true }
+image = { workspace = true }
 thiserror = { workspace = true }
 
 [[example]]

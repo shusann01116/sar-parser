@@ -1,4 +1,7 @@
-use crate::{core::result::Result, core::sa::Position};
+use crate::core::{
+    result::Result,
+    sa::{Position, SymbolArtLayer},
+};
 
 /// Represents the header of a SAR file containing metadata
 #[derive(Debug, Clone, PartialEq)]
@@ -140,6 +143,24 @@ impl Layer {
     /// Extracts the blue color component from the layer data
     fn extract_color_b(layer_data: u32) -> u8 {
         ((layer_data & Self::MASK_COLOR_B) >> 12) as u8
+    }
+}
+
+impl SymbolArtLayer for Layer {
+    fn top_left(&self) -> Position {
+        self.top_left
+    }
+
+    fn bottom_left(&self) -> Position {
+        self.bottom_left
+    }
+
+    fn top_right(&self) -> Position {
+        self.top_right
+    }
+
+    fn bottom_right(&self) -> Position {
+        self.bottom_right
     }
 }
 

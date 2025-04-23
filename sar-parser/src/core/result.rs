@@ -6,4 +6,8 @@ pub enum SARError {
     InvalidFileFormat,
     #[error(transparent)]
     IoError(#[from] std::io::Error),
+    #[error("Image not found")]
+    ImageNotFound,
+    #[error(transparent)]
+    ImageError(#[from] image::ImageError),
 }
