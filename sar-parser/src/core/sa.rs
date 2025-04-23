@@ -9,8 +9,6 @@ pub struct Position {
     pub y: u8,
 }
 
-enum Symbol {}
-
 pub trait SymbolArt<L>
 where
     L: SymbolArtLayer,
