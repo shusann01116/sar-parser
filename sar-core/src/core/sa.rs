@@ -1,5 +1,3 @@
-use imageproc::geometric_transformations::Projection;
-
 use super::symbol::Symbol;
 
 /// Represents a position in 2D space
@@ -13,7 +11,7 @@ pub struct Position {
 
 pub trait SymbolArt<L>
 where
-    L: SymbolArtLayer,
+    L: SymbolArtLayer + std::fmt::Debug,
 {
     fn author_id(&self) -> u32;
     fn layers(&self) -> Vec<L>;

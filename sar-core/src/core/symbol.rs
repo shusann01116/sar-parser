@@ -17,7 +17,7 @@ impl From<u16> for SymbolId {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Symbol {
     id: SymbolId,
 }

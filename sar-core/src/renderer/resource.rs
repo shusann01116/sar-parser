@@ -41,7 +41,7 @@ impl Resource {
         Ok(Self { sheets })
     }
 
-    pub fn get_image(&self, id: &SymbolId) -> Option<SubImage<&DynamicImage>> {
+    pub fn get_image(&self, id: SymbolId) -> Option<SubImage<&DynamicImage>> {
         let index = ImageIndex::get(id)?;
         let sheet = self.sheets.get(&index.sheet)?;
         let (x, y, width, height) = Self::get_coordinates(&index);
@@ -62,7 +62,7 @@ struct ImageIndex {
 }
 
 impl ImageIndex {
-    fn get(id: &SymbolId) -> Option<Self> {
+    fn get(id: SymbolId) -> Option<Self> {
         match id.id() {
             id @ 1..=80 => Some(Self {
                 sheet: ImageSheet::R,
@@ -107,15 +107,15 @@ mod test {
 
     #[test]
     fn test_get_image_index() {
-        let index = ImageIndex::get(&SymbolId::new(1));
+        let index = ImageIndex::get(SymbolId::new(1));
         assert!(index.is_some());
     }
 
     #[test]
     fn test_get_image() {
         let resource = Resource::new().unwrap();
-        let image = resource.get_image(&SymbolId::new(40)).unwrap();
-        let image2 = resource.get_image(&SymbolId::new(41)).unwrap();
+        let image = resource.get_image(SymbolId::new(40)).unwrap();
+        let image2 = resource.get_image(SymbolId::new(41)).unwrap();
         assert_eq!(image.width(), SYMBOL_PIXELS);
         assert_eq!(image.height(), SYMBOL_PIXELS);
         assert_eq!(image2.width(), SYMBOL_PIXELS);

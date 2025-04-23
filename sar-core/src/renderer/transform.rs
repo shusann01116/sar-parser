@@ -34,7 +34,7 @@ mod tests {
         let layer = layers.first().unwrap();
 
         let resource = crate::renderer::resource::Resource::new().unwrap();
-        let image = resource.get_image(&layer.symbol().id()).unwrap();
+        let image = resource.get_image(layer.symbol().id()).unwrap();
 
         let transformed = imageproc::geometric_transformations::warp(
             &image.to_image(),
