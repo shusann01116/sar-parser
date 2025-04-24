@@ -1,3 +1,5 @@
+use imageproc::geometric_transformations::Projection;
+
 use crate::{
     core::{
         result::{Result, SARError},
@@ -253,15 +255,17 @@ impl TryFrom<&Layer> for imageproc::geometric_transformations::Projection {
         let top_right = value.top_right();
         let bottom_right = value.bottom_right();
 
-        // TODO: fix projection, because all coordinates are not normalized
+        let to = [
+            (top_left.x as f32, top_left.y as f32),
+            (top_right.x as f32, top_right.y as f32),
+            (bottom_right.x as f32, bottom_right.y as f32),
+            (bottom_left.x as f32, bottom_left.y as f32),
+        ];
+
+        const WIDTH: f32 = 64.0;
         let projection = imageproc::geometric_transformations::Projection::from_control_points(
-            [(0.0, 0.0), (0.0, 1.0), (1.0, 0.0), (1.0, 1.0)],
-            [
-                (top_left.x as f32 / 128.0, top_left.y as f32 / 128.0),
-                (bottom_left.x as f32 / 128.0, bottom_left.y as f32 / 128.0),
-                (top_right.x as f32 / 128.0, top_right.y as f32 / 128.0),
-                (bottom_right.x as f32 / 128.0, bottom_right.y as f32 / 128.0),
-            ],
+            [(0.0, 0.0), (WIDTH, 0.0), (WIDTH, WIDTH), (0.0, WIDTH)],
+            to,
         )
         .ok_or(SARError::ProjectionError([
             top_left,

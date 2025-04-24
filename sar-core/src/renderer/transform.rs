@@ -1,5 +1,9 @@
 #[cfg(test)]
 mod tests {
+    use std::result;
+
+    use image::{imageops, DynamicImage};
+
     use crate::{
         core::sa::{SymbolArt, SymbolArtLayer},
         parser,
@@ -29,20 +33,29 @@ mod tests {
     #[test]
     fn test_projection_from_layer() {
         let bytes = Vec::from(RAW_FILE);
-        let sa = parser::payload::parse(bytes.into()).unwrap();
+        let sa = parser::parse(bytes.into()).unwrap();
         let layers = sa.layers();
-        let layer = layers.first().unwrap();
+        let mut result_image = DynamicImage::new(256, 256, image::ColorType::Rgba8);
+        for (i, layer) in layers.iter().enumerate() {
+            let resource = crate::renderer::resource::Resource::new().unwrap();
+            let image = match resource.get_image(layer.symbol().id()) {
+                Some(image) => image,
+                None => {
+                    println!("Symbol {} not found", layer.symbol().id());
+                    continue;
+                }
+            };
 
-        let resource = crate::renderer::resource::Resource::new().unwrap();
-        let image = resource.get_image(layer.symbol().id()).unwrap();
-
-        let transformed = imageproc::geometric_transformations::warp(
-            &image.to_image(),
-            &layer.try_into().unwrap(),
-            imageproc::geometric_transformations::Interpolation::Bilinear,
-            image::Rgba([0; 4]),
-        );
-
-        transformed.save("test.png").unwrap();
+            let mut new_image = DynamicImage::new(256, 256, image::ColorType::Rgba8).into();
+            imageproc::geometric_transformations::warp_into(
+                &image.to_image(),
+                &layer.try_into().unwrap(),
+                imageproc::geometric_transformations::Interpolation::Bilinear,
+                image::Rgba([0; 4]),
+                &mut new_image,
+            );
+            imageops::overlay(&mut result_image, &new_image, 0, 0);
+            result_image.save(format!("test_{}.png", i)).unwrap();
+        }
     }
 }
