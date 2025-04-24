@@ -1,5 +1,3 @@
-use imageproc::geometric_transformations::Projection;
-
 use crate::{
     core::{
         result::{Result, SARError},
@@ -243,6 +241,10 @@ impl SymbolArtLayer for Layer {
 
     fn color(&self) -> sa::Color {
         sa::Color::new(self.alpha, self.color_r, self.color_g, self.color_b)
+    }
+
+    fn is_hidden(&self) -> bool {
+        self.is_hidden
     }
 }
 

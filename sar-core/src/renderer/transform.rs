@@ -7,6 +7,7 @@ mod tests {
     use crate::{
         core::sa::{SymbolArt, SymbolArtLayer},
         parser,
+        renderer::resource,
         test::RAW_FILE,
     };
 
@@ -36,8 +37,13 @@ mod tests {
         let sa = parser::parse(bytes.into()).unwrap();
         let layers = sa.layers();
         let mut result_image = DynamicImage::new(256, 256, image::ColorType::Rgba8);
-        for (i, layer) in layers.iter().enumerate() {
+        for layer in layers.iter().rev() {
+            if layer.is_hidden() {
+                continue;
+            }
+
             let resource = crate::renderer::resource::Resource::new().unwrap();
+
             let image = match resource.get_image(layer.symbol().id()) {
                 Some(image) => image,
                 None => {
@@ -55,7 +61,7 @@ mod tests {
                 &mut new_image,
             );
             imageops::overlay(&mut result_image, &new_image, 0, 0);
-            result_image.save(format!("test_{}.png", i)).unwrap();
         }
+        result_image.save(format!("test.png")).unwrap();
     }
 }

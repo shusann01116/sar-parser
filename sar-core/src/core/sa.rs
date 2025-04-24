@@ -24,6 +24,7 @@ pub trait SymbolArtLayer {
     fn bottom_right(&self) -> Position;
     fn symbol(&self) -> Symbol;
     fn color(&self) -> Color;
+    fn is_hidden(&self) -> bool;
 }
 
 pub struct Color {

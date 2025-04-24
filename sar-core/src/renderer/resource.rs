@@ -44,15 +44,15 @@ impl Resource {
     pub fn get_image(&self, id: SymbolId) -> Option<SubImage<&DynamicImage>> {
         let index = ImageIndex::get(id)?;
         let sheet = self.sheets.get(&index.sheet)?;
-        let (x, y, width, height) = Self::get_coordinates(&index);
-        let image = imageops::crop_imm(sheet, x, y, width, height);
+        let (x, y) = Self::get_coordinates(&index);
+        let image = imageops::crop_imm(sheet, x, y, SYMBOL_PIXELS, SYMBOL_PIXELS);
         Some(image)
     }
 
-    fn get_coordinates(index: &ImageIndex) -> (u32, u32, u32, u32) {
+    fn get_coordinates(index: &ImageIndex) -> (u32, u32) {
         let x = index.index % SYMBOL_WIDTH_NUM * SYMBOL_PIXELS;
         let y = index.index / SYMBOL_WIDTH_NUM * SYMBOL_PIXELS;
-        (x, y, SYMBOL_PIXELS, SYMBOL_PIXELS)
+        (x, y)
     }
 }
 
@@ -66,13 +66,13 @@ impl ImageIndex {
         match id.id() {
             id @ 1..=80 => Some(Self {
                 sheet: ImageSheet::R,
-                index: id - 1,
+                index: id,
             }),
-            id @ 241..=480 => {
+            id @ 240..=480 => {
                 let offset = match id {
-                    305..400 => 241 + 16,
-                    _ if id > 400 => 241 + 16 * 2,
-                    _ => 241,
+                    305..400 => 240 + 16,
+                    _ if id > 400 => 240 + 16 * 2,
+                    _ => 240,
                 };
                 Some(Self {
                     sheet: ImageSheet::G,
@@ -81,9 +81,9 @@ impl ImageIndex {
             }
             id @ 481..=720 => {
                 let offset = match id {
-                    561..641 => 481 + 16,
-                    _ if id > 641 => 481 + 16 * 2,
-                    _ => 481,
+                    561..641 => 480 + 16,
+                    _ if id > 641 => 480 + 16 * 2,
+                    _ => 480,
                 };
                 Some(Self {
                     sheet: ImageSheet::B,
@@ -92,7 +92,7 @@ impl ImageIndex {
             }
             id @ 721..=768 => Some(Self {
                 sheet: ImageSheet::Color,
-                index: id - 721,
+                index: id - 720,
             }),
             _ => None,
         }
