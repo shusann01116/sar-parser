@@ -35,12 +35,12 @@ pub enum Compression {
 
 pub fn validate_format(bytes: &[u8]) -> Result<Compression> {
     if bytes[0..3] != [b's', b'a', b'r'] {
-        return Err(SARError::InvalidFileFormat);
+        return Err(SARError::InvalidFileHeader);
     }
     match bytes[3] {
         0x84 => Ok(Compression::Compressed),
         0x04 => Ok(Compression::None),
-        _ => Err(SARError::InvalidFileFormat),
+        _ => Err(SARError::InvalidFileHeader),
     }
 }
 

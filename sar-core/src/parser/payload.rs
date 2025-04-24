@@ -263,7 +263,12 @@ impl TryFrom<&Layer> for imageproc::geometric_transformations::Projection {
                 (bottom_right.x as f32 / 128.0, bottom_right.y as f32 / 128.0),
             ],
         )
-        .ok_or(SARError::ProjectionError)?;
+        .ok_or(SARError::ProjectionError([
+            top_left,
+            bottom_left,
+            top_right,
+            bottom_right,
+        ]))?;
 
         Ok(projection)
     }

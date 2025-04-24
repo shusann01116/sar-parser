@@ -11,6 +11,12 @@ impl SymbolId {
     }
 }
 
+impl std::fmt::Display for SymbolId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
 impl From<u16> for SymbolId {
     fn from(id: u16) -> Self {
         Self(id as u32)
