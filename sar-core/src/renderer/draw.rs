@@ -131,7 +131,7 @@ where
                     imageproc::geometric_transformations::warp_into(
                         &image.to_image(),
                         &projection,
-                        imageproc::geometric_transformations::Interpolation::Bilinear,
+                        imageproc::geometric_transformations::Interpolation::Nearest,
                         image::Rgba([0; 4]),
                         &mut symbol,
                     );
