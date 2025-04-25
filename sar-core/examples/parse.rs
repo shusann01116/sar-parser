@@ -7,7 +7,7 @@ fn main() {
     let target_dir = current_dir.join("sar-core").join("examples").join("result");
 
     let files = std::fs::read_dir(&examples_dir).unwrap();
-    let drawer = sar_core::drawer();
+    let drawer = sar_core::SymbolArtDrawer::new();
     files.par_bridge().for_each(|file| {
         let file = match file {
             Ok(file) => file,
@@ -18,7 +18,7 @@ fn main() {
         }
 
         let buff = std::fs::read(file.path()).unwrap();
-        let sar = match sar_core::parse(Vec::from(buff).into()) {
+        let sar = match sar_core::parse(buff) {
             Ok(sar) => sar,
             Err(e) => {
                 println!(

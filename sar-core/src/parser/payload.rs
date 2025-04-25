@@ -8,8 +8,8 @@ use crate::{
 };
 
 /// Parses a byte array into a Payload structure
-pub fn parse(bytes: Box<[u8]>) -> Result<impl SymbolArt + std::fmt::Debug> {
-    let body = get_body(bytes)?;
+pub fn parse(bytes: impl Into<Box<[u8]>>) -> Result<impl SymbolArt + std::fmt::Debug> {
+    let body = get_body(bytes.into())?;
     Payload::parse(&body)
 }
 

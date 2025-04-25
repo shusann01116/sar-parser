@@ -20,13 +20,25 @@ where
     fn draw_with_scale(&self, sa: &S, scale: f32) -> Result<ImageBuffer<Rgba<u8>, Vec<u8>>>;
 }
 
-pub(super) struct DrawerImpl {
+pub struct SymbolArtDrawer {
     resource: resource::Resource,
     canvas_size: (u32, u32),
     view_size: (u32, u32),
 }
 
-impl DrawerImpl {
+impl SymbolArtDrawer {
+    pub fn new() -> Self {
+        let resource = resource::Resource::new().unwrap();
+        let canvas_size = (256, 256);
+        let view_size = (193, 96);
+
+        Self {
+            resource,
+            canvas_size,
+            view_size,
+        }
+    }
+
     fn calc_canvas_size(&self, scale: f32) -> (u32, u32) {
         (
             (self.canvas_size.0 as f32 * scale) as u32,
@@ -76,7 +88,7 @@ impl DrawerImpl {
     }
 }
 
-impl Default for DrawerImpl {
+impl Default for SymbolArtDrawer {
     fn default() -> Self {
         Self {
             resource: resource::Resource::new().unwrap(),
@@ -86,7 +98,7 @@ impl Default for DrawerImpl {
     }
 }
 
-impl<S, L> Drawer<S, L> for DrawerImpl
+impl<S, L> Drawer<S, L> for SymbolArtDrawer
 where
     S: SymbolArt<Layer = L>,
     L: SymbolArtLayer + Sync,
@@ -138,7 +150,7 @@ where
                         &mut symbol,
                     );
 
-                    DrawerImpl::render_symbol(&mut canvas, &mut symbol, layer.color());
+                    SymbolArtDrawer::render_symbol(&mut canvas, &mut symbol, layer.color());
                 }
 
                 Some((i, canvas))
@@ -177,9 +189,9 @@ mod tests {
     #[test]
     fn test_drawer() {
         let bytes = Vec::from(RAW_FILE);
-        let sa = parse(bytes.into()).unwrap();
+        let sa = parse(bytes).unwrap();
 
-        let drawer = DrawerImpl::default();
+        let drawer = SymbolArtDrawer::default();
         let image = drawer.draw(&sa).unwrap();
 
         // Assert
@@ -193,9 +205,9 @@ mod tests {
     #[test]
     fn test_drawer_with_scale() {
         let bytes = Vec::from(RAW_FILE);
-        let sa = parse(bytes.into()).unwrap();
+        let sa = parse(bytes).unwrap();
 
-        let drawer = DrawerImpl::default();
+        let drawer = SymbolArtDrawer::default();
         let image = drawer.draw_with_scale(&sa, 2.0).unwrap();
 
         // Assert
