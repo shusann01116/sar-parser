@@ -1061,6 +1061,7 @@ dependencies = [
 name = "sar-cli"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "clap",
  "sar-core",
 ]

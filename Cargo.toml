@@ -1,5 +1,5 @@
 [workspace]
-members = ["sar-core"]
+members = ["sar-cli", "sar-core"]
 resolver = "2"
 package.license = "MIT"
 package.version = "0.1.0"

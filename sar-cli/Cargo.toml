@@ -1,0 +1,11 @@
+[package]
+name = "sar-cli"
+edition = "2024"
+license.workspace = true
+version.workspace = true
+authors.workspace = true
+
+[dependencies]
+anyhow = "1.0.98"
+clap = { workspace = true, features = ["derive"] }
+sar-core = { path = "../sar-core" }
