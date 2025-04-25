@@ -169,40 +169,40 @@ where
 
 #[cfg(test)]
 mod tests {
-    use std::time::Instant;
+    use image::codecs::png::PngEncoder;
 
     use super::*;
     use crate::{parse, test::RAW_FILE};
 
     #[test]
     fn test_drawer() {
-        let now = Instant::now();
-        println!("Started at {:?}", now);
-
         let bytes = Vec::from(RAW_FILE);
         let sa = parse(bytes.into()).unwrap();
-        println!("Parsed in {}ms", now.elapsed().as_millis());
 
         let drawer = DrawerImpl::default();
         let image = drawer.draw(&sa).unwrap();
-        println!("Drawn in {}ms", now.elapsed().as_millis());
 
-        image.save(format!("test.png")).unwrap();
+        // Assert
+        let mut buff = Vec::new();
+        image
+            .write_with_encoder(PngEncoder::new(&mut buff))
+            .unwrap();
+        assert_eq!(buff.len(), include_bytes!("fixture/test.png").len());
     }
 
     #[test]
     fn test_drawer_with_scale() {
-        let now = Instant::now();
-        println!("Started at {:?}", now);
-
         let bytes = Vec::from(RAW_FILE);
         let sa = parse(bytes.into()).unwrap();
-        println!("Parsed in {}ms", now.elapsed().as_millis());
 
         let drawer = DrawerImpl::default();
         let image = drawer.draw_with_scale(&sa, 2.0).unwrap();
-        println!("Drawn in {}ms", now.elapsed().as_millis());
 
-        image.save(format!("testx2.png")).unwrap();
+        // Assert
+        let mut buff = Vec::new();
+        image
+            .write_with_encoder(PngEncoder::new(&mut buff))
+            .unwrap();
+        assert_eq!(buff.len(), include_bytes!("fixture/testx2.png").len());
     }
 }
