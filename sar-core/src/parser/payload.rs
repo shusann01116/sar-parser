@@ -65,11 +65,30 @@ impl Payload {
     }
 }
 
+const HEADER_SIZE_TEAM_FLAG: u8 = 0x40;
+const HEADER_SIZE_NORMAL: u8 = 0x80;
+
 impl SymbolArt for Payload {
     type Layer = Layer;
 
     fn author_id(&self) -> u32 {
         self.header.author_id
+    }
+
+    fn height(&self) -> u8 {
+        match self.header.height {
+            HEADER_SIZE_NORMAL => 192,
+            HEADER_SIZE_TEAM_FLAG => 32,
+            _ => panic!("Invalid height"),
+        }
+    }
+
+    fn width(&self) -> u8 {
+        match self.header.height {
+            HEADER_SIZE_NORMAL => 192,
+            HEADER_SIZE_TEAM_FLAG => 32,
+            _ => panic!("Invalid width"),
+        }
     }
 
     fn layers(&self) -> Vec<Layer> {

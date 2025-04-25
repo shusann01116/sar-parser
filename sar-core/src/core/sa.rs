@@ -14,6 +14,8 @@ pub struct Position {
 pub trait SymbolArt: Send + Sync {
     type Layer: SymbolArtLayer + Send + Sync;
     fn author_id(&self) -> u32;
+    fn height(&self) -> u8;
+    fn width(&self) -> u8;
     fn layers(&self) -> Vec<Self::Layer>;
 }
 
