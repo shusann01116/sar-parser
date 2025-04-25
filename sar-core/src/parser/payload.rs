@@ -157,15 +157,15 @@ pub struct Layer {
     pub(super) color_b: u8,
 }
 
-impl Layer {
-    // Bit masks for layer data
-    const LAYER_IS_HIDDEN: u32 = 0b10000000000000000000000000000000;
-    const MASK_SYMBOL_ID: u32 = 0b01111111111000000000000000000000;
-    const MASK_ALPHA: u32 = 0b00000000000111000000000000000000;
-    const MASK_COLOR_R: u32 = 0b00000000000000000000000000111111;
-    const MASK_COLOR_G: u32 = 0b00000000000000000000111111000000;
-    const MASK_COLOR_B: u32 = 0b00000000000000111111000000000000;
+// Bit masks for layer data
+const LAYER_IS_HIDDEN: u32 = 0b10000000000000000000000000000000;
+const MASK_SYMBOL_ID: u32 = 0b01111111111000000000000000000000;
+const MASK_ALPHA: u32 = 0b00000000000111000000000000000000;
+const MASK_COLOR_R: u32 = 0b00000000000000000000000000111111;
+const MASK_COLOR_G: u32 = 0b00000000000000000000111111000000;
+const MASK_COLOR_B: u32 = 0b00000000000000111111000000000000;
 
+impl Layer {
     /// Parses a byte slice into a Layer structure
     fn parse(bytes: &[u8]) -> Result<Self> {
         let top_left = Position::parse(&bytes[0..2])?;
@@ -191,34 +191,48 @@ impl Layer {
 
     /// Extracts the hidden flag from the layer data
     fn extract_is_hidden(layer_data: u32) -> bool {
-        (layer_data & Self::LAYER_IS_HIDDEN) != 0
+        (layer_data & LAYER_IS_HIDDEN) != 0
     }
 
     /// Extracts the symbol ID from the layer data
     fn extract_symbol_id(layer_data: u32) -> u16 {
-        ((layer_data & Self::MASK_SYMBOL_ID) >> 21) as u16
+        ((layer_data & MASK_SYMBOL_ID) >> 21) as u16
     }
 
     /// Extracts the alpha value from the layer data
     fn extract_alpha(layer_data: u32) -> u8 {
-        ((layer_data & Self::MASK_ALPHA) >> 18) as u8
+        ((layer_data & MASK_ALPHA) >> 18) as u8
     }
 
     /// Extracts the red color component from the layer data
     fn extract_color_r(layer_data: u32) -> u8 {
-        (layer_data & Self::MASK_COLOR_R) as u8
+        (layer_data & MASK_COLOR_R) as u8
     }
 
     /// Extracts the green color component from the layer data
     fn extract_color_g(layer_data: u32) -> u8 {
-        ((layer_data & Self::MASK_COLOR_G) >> 6) as u8
+        ((layer_data & MASK_COLOR_G) >> 6) as u8
     }
 
     /// Extracts the blue color component from the layer data
     fn extract_color_b(layer_data: u32) -> u8 {
-        ((layer_data & Self::MASK_COLOR_B) >> 12) as u8
+        ((layer_data & MASK_COLOR_B) >> 12) as u8
     }
 }
+
+/// The factor used to convert the alpha value to a 8-bit value.
+/// SAR files use a 3-bit alpha value, so we need to scale it up to 8-bit
+///
+/// We use 37 to avoid floating point arithmetic for better performance
+/// 255 / 7 = 36.4285714286
+const ALPHA_FACTOR: u8 = 37;
+
+/// The factor used to convert the color value to a 8-bit value.
+/// SAR files use a 4-bit color value, so we need to scale it up to 8-bit
+///
+/// We use 4 to avoid floating point arithmetic for better performance
+/// 255 / 63 = 4.0476190476
+const COLOR_FACTOR: u8 = 4;
 
 impl SymbolArtLayer for Layer {
     fn top_left(&self) -> Position {
@@ -242,7 +256,11 @@ impl SymbolArtLayer for Layer {
     }
 
     fn color(&self) -> sa::Color {
-        sa::Color::new(self.alpha, self.color_r, self.color_g, self.color_b)
+        let a = self.alpha.saturating_mul(ALPHA_FACTOR);
+        let r = self.color_r.saturating_mul(COLOR_FACTOR);
+        let g = self.color_g.saturating_mul(COLOR_FACTOR);
+        let b = self.color_b.saturating_mul(COLOR_FACTOR);
+        sa::Color::new(a, r, g, b)
     }
 
     fn is_hidden(&self) -> bool {

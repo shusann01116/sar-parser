@@ -41,17 +41,8 @@ impl Color {
     }
 }
 
-/// The factor used to convert the alpha value to a 8-bit value.
-/// SAR files use a 3-bit alpha value, so we need to scale it up to 8-bit
-const ALPHA_FACTOR: u8 = 37;
-
 impl From<Color> for image::Rgba<u8> {
     fn from(value: Color) -> Self {
-        image::Rgba([
-            value.r,
-            value.g,
-            value.b,
-            value.a.saturating_mul(ALPHA_FACTOR),
-        ])
+        image::Rgba([value.r, value.g, value.b, value.a])
     }
 }

@@ -156,20 +156,14 @@ where
         }
 
         let view_size = self.calc_view_size(scale);
-        let mut cropped = canvas
+        Ok(canvas
             .sub_image(
                 canvas_size.0 / 2 - view_size.0 / 2,
                 canvas_size.1 / 2 - view_size.1 / 2,
                 view_size.0,
                 view_size.1,
             )
-            .to_image();
-
-        // TODO: Palette を使用して RGB を HSV に変換、色を保ちながら不透明にする
-        // https://docs.rs/palette/latest/palette/index.html
-        let cropped = cropped;
-
-        Ok(cropped)
+            .to_image())
     }
 }
 
