@@ -65,6 +65,14 @@ impl DrawerImpl {
 
         Ok(projection)
     }
+
+    fn tint_image(image: &mut RgbaImage, tint: [u8; 4]) {
+        for pixel in image.pixels_mut() {
+            pixel[0] = (pixel[0] as u16 * tint[0] as u16 / 255) as u8;
+            pixel[1] = (pixel[1] as u16 * tint[1] as u16 / 255) as u8;
+            pixel[2] = (pixel[2] as u16 * tint[2] as u16 / 255) as u8;
+        }
+    }
 }
 
 impl Default for DrawerImpl {
@@ -127,6 +135,9 @@ where
                         image::Rgba([0; 4]),
                         &mut symbol,
                     );
+                    let tint = [layer.color().r, layer.color().g, layer.color().b, 255];
+
+                    DrawerImpl::tint_image(&mut symbol, tint);
                     imageops::overlay(&mut canvas, &symbol, 0, 0);
                 }
 
