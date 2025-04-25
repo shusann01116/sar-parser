@@ -7,7 +7,7 @@ fn main() {
     let target_dir = current_dir.join("sar-core").join("examples").join("result");
 
     let files = std::fs::read_dir(&examples_dir).unwrap();
-    files.par_bridge().for_each(|file| {
+    files.take(10).par_bridge().for_each(|file| {
         let file = match file {
             Ok(file) => file,
             Err(_) => return,
