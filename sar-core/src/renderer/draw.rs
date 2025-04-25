@@ -99,11 +99,12 @@ where
         let mut canvas = RgbaImage::new(canvas_size.0, canvas_size.1);
 
         let (tx, rx) = mpsc::channel();
-        let overlays = sa
+        let mut overlays = sa
             .layers()
             .par_chunks(10)
             .rev()
-            .filter_map(|chunk| {
+            .enumerate()
+            .filter_map(|(i, chunk)| {
                 let tx = tx.clone();
                 let mut canvas = RgbaImage::new(canvas_size.0, canvas_size.1);
                 for layer in chunk {
@@ -146,7 +147,7 @@ where
                     imageops::overlay(&mut canvas, &symbol, 0, 0);
                 }
 
-                Some(canvas)
+                Some((i, canvas))
             })
             .collect::<Vec<_>>();
 
@@ -155,7 +156,8 @@ where
             return Err(e);
         }
 
-        for overlay in overlays {
+        overlays.sort_by_key(|(i, _)| *i);
+        for (_, overlay) in overlays {
             imageops::overlay(&mut canvas, &overlay, 0, 0);
         }
 
