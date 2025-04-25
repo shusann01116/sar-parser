@@ -1,5 +1,5 @@
 use rayon::prelude::*;
-use sar_parser_core::draw;
+use sar_parser_core::renderer::draw::Drawer;
 
 fn main() {
     let current_dir = std::env::current_dir().unwrap();
@@ -7,7 +7,8 @@ fn main() {
     let target_dir = current_dir.join("sar-core").join("examples").join("result");
 
     let files = std::fs::read_dir(&examples_dir).unwrap();
-    files.take(10).par_bridge().for_each(|file| {
+    let drawer = sar_parser_core::drawer();
+    files.par_bridge().for_each(|file| {
         let file = match file {
             Ok(file) => file,
             Err(_) => return,
@@ -17,7 +18,7 @@ fn main() {
         }
 
         let buff = std::fs::read(file.path()).unwrap();
-        let sar = match sar_parser_core::parser::parse(Vec::from(buff).into()) {
+        let sar = match sar_parser_core::parse(Vec::from(buff).into()) {
             Ok(sar) => sar,
             Err(e) => {
                 println!(
@@ -29,7 +30,7 @@ fn main() {
             }
         };
 
-        let image = match draw(&sar) {
+        let image = match drawer.draw(&sar) {
             Ok(image) => image,
             Err(e) => {
                 println!("Error drawing {}: {}", file.path().display(), e);

@@ -172,7 +172,7 @@ mod tests {
     use std::time::Instant;
 
     use super::*;
-    use crate::{parser, test::RAW_FILE};
+    use crate::{parse, test::RAW_FILE};
 
     #[test]
     fn test_drawer() {
@@ -180,7 +180,7 @@ mod tests {
         println!("Started at {:?}", now);
 
         let bytes = Vec::from(RAW_FILE);
-        let sa = parser::parse(bytes.into()).unwrap();
+        let sa = parse(bytes.into()).unwrap();
         println!("Parsed in {}ms", now.elapsed().as_millis());
 
         let drawer = DrawerImpl::default();
@@ -196,7 +196,7 @@ mod tests {
         println!("Started at {:?}", now);
 
         let bytes = Vec::from(RAW_FILE);
-        let sa = parser::parse(bytes.into()).unwrap();
+        let sa = parse(bytes.into()).unwrap();
         println!("Parsed in {}ms", now.elapsed().as_millis());
 
         let drawer = DrawerImpl::default();
