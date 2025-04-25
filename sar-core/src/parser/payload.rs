@@ -1,6 +1,6 @@
 use crate::{
     core::{
-        result::{Result, SARError},
+        result::Result,
         sa::{self, Position, SymbolArt, SymbolArtLayer},
         symbol,
     },
@@ -8,7 +8,7 @@ use crate::{
 };
 
 /// Parses a byte array into a Payload structure
-pub fn parse(bytes: Box<[u8]>) -> Result<impl SymbolArt<Layer> + std::fmt::Debug> {
+pub fn parse(bytes: Box<[u8]>) -> Result<impl SymbolArt + std::fmt::Debug> {
     let body = get_body(bytes)?;
     Payload::parse(&body)
 }
@@ -55,7 +55,7 @@ impl Payload {
         let size_of_layer = std::mem::size_of::<Layer>();
         let start = size_of_header + size_of_layer * header.layers() as usize;
 
-        let name_bytes = bytes[start..]
+        let name_bytes = bytes[usize::min(start, bytes.len())..]
             .chunks_exact(2)
             .take(13) // Name is at most 13 chars
             .map(|b| u16::from_le_bytes(b.try_into().unwrap()))
@@ -65,7 +65,9 @@ impl Payload {
     }
 }
 
-impl SymbolArt<Layer> for Payload {
+impl SymbolArt for Payload {
+    type Layer = Layer;
+
     fn author_id(&self) -> u32 {
         self.header.author_id
     }
@@ -131,7 +133,7 @@ impl From<Layers> for Vec<Layer> {
 }
 
 /// Represents a single layer in a SAR file
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Copy)]
 pub struct Layer {
     /// Top-left position of the layer
     pub(super) top_left: Position,
@@ -245,38 +247,6 @@ impl SymbolArtLayer for Layer {
 
     fn is_hidden(&self) -> bool {
         self.is_hidden
-    }
-}
-
-impl TryFrom<&Layer> for imageproc::geometric_transformations::Projection {
-    type Error = SARError;
-
-    fn try_from(value: &Layer) -> Result<Self> {
-        let top_left = value.top_left();
-        let bottom_left = value.bottom_left();
-        let top_right = value.top_right();
-        let bottom_right = value.bottom_right();
-
-        let to = [
-            (top_left.x as f32, top_left.y as f32),
-            (top_right.x as f32, top_right.y as f32),
-            (bottom_right.x as f32, bottom_right.y as f32),
-            (bottom_left.x as f32, bottom_left.y as f32),
-        ];
-
-        const WIDTH: f32 = 64.0;
-        let projection = imageproc::geometric_transformations::Projection::from_control_points(
-            [(0.0, 0.0), (WIDTH, 0.0), (WIDTH, WIDTH), (0.0, WIDTH)],
-            to,
-        )
-        .ok_or(SARError::ProjectionError([
-            top_left,
-            bottom_left,
-            top_right,
-            bottom_right,
-        ]))?;
-
-        Ok(projection)
     }
 }
 

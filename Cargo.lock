@@ -963,6 +963,7 @@ dependencies = [
  "blowfish",
  "image",
  "imageproc",
+ "rayon",
  "thiserror 2.0.12",
 ]
 

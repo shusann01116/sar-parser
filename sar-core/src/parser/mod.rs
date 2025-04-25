@@ -1,3 +1,3 @@
 mod decode;
-pub mod payload;
+pub(crate) mod payload;
 pub use payload::parse;

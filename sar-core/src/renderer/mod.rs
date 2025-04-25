@@ -1,11 +1,19 @@
-use image::DynamicImage;
-
-use crate::core::result::Result;
-use crate::core::sa::{SymbolArt, SymbolArtLayer};
-
+mod draw;
 pub mod resource;
-mod transform;
 
-pub fn render<T: SymbolArt<L>, L: SymbolArtLayer + std::fmt::Debug>(sa: T) -> Result<DynamicImage> {
-    todo!()
+/// A handy function to draw a SymbolArt
+pub(crate) mod default {
+    use super::draw::{Drawer, DrawerImpl};
+    use crate::core::sa::{SymbolArt, SymbolArtLayer};
+    use crate::Result;
+    use image::{ImageBuffer, Rgba};
+
+    pub fn draw<S, L>(sa: &S) -> Result<ImageBuffer<Rgba<u8>, Vec<u8>>>
+    where
+        S: SymbolArt<Layer = L>,
+        L: SymbolArtLayer + Sync,
+    {
+        let drawer = DrawerImpl::default();
+        drawer.draw(sa)
+    }
 }
