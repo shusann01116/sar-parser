@@ -1,7 +1,9 @@
 [package]
-name = "sar-parser-core"
-version = "0.1.0"
+name = "sar-core"
 edition = "2021"
+license.workspace = true
+version.workspace = true
+authors.workspace = true
 
 [dependencies]
 ages-prs = { workspace = true }
