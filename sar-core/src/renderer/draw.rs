@@ -107,7 +107,7 @@ where
             .filter_map(|(i, chunk)| {
                 let tx = tx.clone();
                 let mut canvas = RgbaImage::new(canvas_size.0, canvas_size.1);
-                for layer in chunk {
+                for layer in chunk.iter().rev() {
                     if layer.is_hidden() {
                         continue;
                     }
