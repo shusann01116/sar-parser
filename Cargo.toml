@@ -1,6 +1,11 @@
 [workspace]
 members = ["sar-core"]
 resolver = "2"
+package.license = "MIT"
+package.version = "0.1.0"
+package.authors = [
+  "shusann01116 <26602565+shusann01116@users.noreply.github.com>",
+]
 
 [workspace.dependencies]
 ages-prs = "=0.1.0"
