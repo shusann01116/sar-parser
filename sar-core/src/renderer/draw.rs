@@ -135,7 +135,12 @@ where
                         image::Rgba([0; 4]),
                         &mut symbol,
                     );
-                    let tint = [layer.color().r, layer.color().g, layer.color().b, 255];
+                    let tint = [
+                        layer.color().r,
+                        layer.color().g,
+                        layer.color().b,
+                        layer.color().a,
+                    ];
 
                     DrawerImpl::tint_image(&mut symbol, tint);
                     imageops::overlay(&mut canvas, &symbol, 0, 0);
