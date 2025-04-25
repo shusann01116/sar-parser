@@ -67,12 +67,30 @@ impl DrawerImpl {
     }
 
     fn tint_image(image: &mut RgbaImage, tint: [u8; 4]) {
+        let alpha_8bit = (tint[3].min(7) as u16 * 255 / 7) as u8;
+
         for pixel in image.pixels_mut() {
             pixel[0] = (pixel[0] as u16 * tint[0] as u16 / 255) as u8;
             pixel[1] = (pixel[1] as u16 * tint[1] as u16 / 255) as u8;
             pixel[2] = (pixel[2] as u16 * tint[2] as u16 / 255) as u8;
+            pixel[3] = (pixel[3] as u16 * alpha_8bit as u16 / 255) as u8;
         }
     }
+
+    fn overlay(base: &mut RgbaImage, overlay: &RgbaImage, x_offset: u32, y_offset: u32) {
+        for (x, y, pixel) in overlay.enumerate_pixels() {
+            let target_x = x + x_offset;
+            let target_y = y + y_offset;
+    
+            if target_x < base.width() && target_y < base.height() {
+                if pixel.0 != [0, 0, 0, 0] {
+                    let base_pixel = base.get_pixel_mut(target_x, target_y);
+                    *base_pixel = *pixel;
+                }
+            }
+        }
+    }
+    
 }
 
 impl Default for DrawerImpl {
@@ -101,7 +119,7 @@ where
         let (tx, rx) = mpsc::channel();
         let mut overlays = sa
             .layers()
-            .par_chunks(10)
+            .par_chunks(1)
             .rev()
             .enumerate()
             .filter_map(|(i, chunk)| {
@@ -144,7 +162,7 @@ where
                     ];
 
                     DrawerImpl::tint_image(&mut symbol, tint);
-                    imageops::overlay(&mut canvas, &symbol, 0, 0);
+                    DrawerImpl::overlay(&mut canvas, &symbol, 0, 0);
                 }
 
                 Some((i, canvas))
@@ -158,7 +176,7 @@ where
 
         overlays.sort_by_key(|(i, _)| *i);
         for (_, overlay) in overlays {
-            imageops::overlay(&mut canvas, &overlay, 0, 0);
+            DrawerImpl::overlay(&mut canvas, &overlay, 0, 0);
         }
 
         let view_size = self.calc_view_size(scale);
