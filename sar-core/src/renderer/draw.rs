@@ -130,12 +130,12 @@ where
                     imageops::overlay(&mut canvas, &symbol, 0, 0);
                 }
 
-                return Some(canvas);
+                Some(canvas)
             })
             .collect::<Vec<_>>();
 
         drop(tx);
-        while let Ok(e) = rx.recv() {
+        if let Ok(e) = rx.recv() {
             return Err(e);
         }
 
