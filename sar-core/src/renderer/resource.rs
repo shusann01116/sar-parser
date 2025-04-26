@@ -41,18 +41,58 @@ impl Resource {
         Ok(Self { sheets })
     }
 
-    pub fn get_image(&self, id: SymbolId) -> Option<SubImage<&DynamicImage>> {
+    pub(crate) fn get_image(&self, id: SymbolId) -> Option<Image> {
         let index = ImageIndex::get(id)?;
         let sheet = self.sheets.get(&index.sheet)?;
         let (x, y) = Self::get_coordinates(&index);
         let image = imageops::crop_imm(sheet, x, y, SYMBOL_PIXELS, SYMBOL_PIXELS);
-        Some(image)
+        Some(Image::new_with_sheet(image, index))
     }
 
     fn get_coordinates(index: &ImageIndex) -> (u32, u32) {
         let x = index.index % SYMBOL_WIDTH_NUM * SYMBOL_PIXELS;
         let y = index.index / SYMBOL_WIDTH_NUM * SYMBOL_PIXELS;
         (x, y)
+    }
+}
+
+pub(crate) enum Image<'a> {
+    R(SubImage<&'a DynamicImage>),
+    G(SubImage<&'a DynamicImage>),
+    B(SubImage<&'a DynamicImage>),
+    Color(SubImage<&'a DynamicImage>),
+}
+
+impl<'a> Image<'a> {
+    pub(crate) fn inner(&self) -> &SubImage<&'a DynamicImage> {
+        match self {
+            Image::R(image) => image,
+            Image::G(image) => image,
+            Image::B(image) => image,
+            Image::Color(image) => image,
+        }
+    }
+}
+
+impl<'a> std::fmt::Debug for Image<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Image::R(_) => write!(f, "R"),
+            Image::G(_) => write!(f, "G"),
+            Image::B(_) => write!(f, "B"),
+            Image::Color(_) => write!(f, "Color"),
+        }
+    }
+}
+
+impl<'a> Image<'a> {
+    fn new_with_sheet(image: SubImage<&'a DynamicImage>, index: ImageIndex) -> Self {
+        match index.sheet {
+            ImageSheet::R => Self::R(image),
+            ImageSheet::G => Self::G(image),
+            ImageSheet::B => Self::B(image),
+            ImageSheet::Color => Self::Color(image),
+        }
     }
 }
 
@@ -116,9 +156,15 @@ mod test {
         let resource = Resource::new().unwrap();
         let image = resource.get_image(SymbolId::new(40)).unwrap();
         let image2 = resource.get_image(SymbolId::new(41)).unwrap();
-        assert_eq!(image.width(), SYMBOL_PIXELS);
-        assert_eq!(image.height(), SYMBOL_PIXELS);
-        assert_eq!(image2.width(), SYMBOL_PIXELS);
-        assert_eq!(image2.height(), SYMBOL_PIXELS);
+        if let Image::R(image) = image {
+            assert_eq!(image.width(), SYMBOL_PIXELS);
+        } else {
+            panic!("image is not R");
+        }
+        if let Image::R(image) = image2 {
+            assert_eq!(image.width(), SYMBOL_PIXELS);
+        } else {
+            panic!("image2 is not R");
+        }
     }
 }

@@ -43,6 +43,11 @@ impl SymbolArtDrawer {
         }
     }
 
+    pub fn with_raise_error(mut self, raise_error: bool) -> Self {
+        self.suppress_failure = !raise_error;
+        self
+    }
+
     fn calc_canvas_size(&self, scale: f32) -> (u32, u32) {
         (
             (self.canvas_size.0 as f32 * scale) as u32,
@@ -82,14 +87,24 @@ impl SymbolArtDrawer {
         Ok(projection)
     }
 
-    fn render_symbol(base: &mut RgbaImage, symbol: &mut RgbaImage, color: Color) {
+    fn render_symbol(base: &mut RgbaImage, symbol: &mut RgbaImage, color: RenderColor) {
         for (x, y, pixel) in base.enumerate_pixels_mut() {
             let symbol_pixel = symbol.get_pixel(x, y);
             if symbol_pixel[3] > 0 {
-                pixel.blend(&color.into());
+                match color {
+                    RenderColor::Color(color) => pixel.blend(&color.into()),
+                    RenderColor::None => {
+                        pixel.blend(symbol_pixel);
+                    }
+                }
             }
         }
     }
+}
+
+pub enum RenderColor {
+    Color(Color),
+    None,
 }
 
 impl Default for SymbolArtDrawer {
@@ -156,15 +171,24 @@ where
                             return None;
                         }
                     };
+
                     imageproc::geometric_transformations::warp_into(
-                        &image.to_image(),
+                        &image.inner().to_image(),
                         &projection,
                         imageproc::geometric_transformations::Interpolation::Nearest,
                         image::Rgba([0; 4]),
                         &mut symbol,
                     );
 
-                    SymbolArtDrawer::render_symbol(&mut canvas, &mut symbol, layer.color());
+                    if let resource::Image::Color(_) = image {
+                        SymbolArtDrawer::render_symbol(&mut canvas, &mut symbol, RenderColor::None);
+                    } else {
+                        SymbolArtDrawer::render_symbol(
+                            &mut canvas,
+                            &mut symbol,
+                            RenderColor::Color(layer.color()),
+                        );
+                    }
                 }
 
                 Some((i, canvas))
@@ -205,7 +229,7 @@ mod tests {
         let bytes = Vec::from(RAW_FILE);
         let sa = parse(bytes).unwrap();
 
-        let drawer = SymbolArtDrawer::default();
+        let drawer = SymbolArtDrawer::new().with_raise_error(true);
         let image = drawer.draw(&sa).unwrap();
 
         // Assert
