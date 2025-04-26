@@ -71,8 +71,13 @@ impl SymbolArtDrawer {
         let top_right = layer.top_right();
         let bottom_right = layer.bottom_right();
 
-        const WIDTH: f32 = 64.0;
-        let from = [(0.0, 0.0), (WIDTH, 0.0), (WIDTH, WIDTH), (0.0, WIDTH)];
+        let symbol_width = self.resource.symbol_pixels as f32;
+        let from = [
+            (0.0, 0.0),
+            (symbol_width, 0.0),
+            (symbol_width, symbol_width),
+            (0.0, symbol_width),
+        ];
         let to = [
             (top_left.x as f32 * scale, top_left.y as f32 * scale),
             (top_right.x as f32 * scale, top_right.y as f32 * scale),

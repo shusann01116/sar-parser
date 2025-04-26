@@ -23,6 +23,7 @@ enum ImageSheet {
 
 pub struct Resource {
     sheets: HashMap<ImageSheet, DynamicImage>,
+    pub symbol_pixels: u32,
 }
 
 impl Resource {
@@ -38,7 +39,10 @@ impl Resource {
         sheets.insert(ImageSheet::B, b);
         sheets.insert(ImageSheet::Color, color);
 
-        Ok(Self { sheets })
+        Ok(Self {
+            sheets,
+            symbol_pixels: SYMBOL_PIXELS,
+        })
     }
 
     pub(crate) fn get_image(&self, id: SymbolId) -> Option<Image> {
