@@ -2,7 +2,7 @@ use anyhow::bail;
 use clap::Parser;
 use sar_core::SymbolArtDrawer;
 use sar_core::renderer::draw::Drawer;
-use std::{io::Cursor, path::PathBuf, sync::Arc};
+use std::{io::Cursor, path::Path, sync::Arc};
 use tokio::{fs, task::spawn_blocking};
 use tokio_stream::{StreamExt, wrappers::ReadDirStream};
 
@@ -15,6 +15,12 @@ struct Args {
     /// Path to the output directory
     #[arg(short, long)]
     output: String,
+    /// Raise errors instead of ignoring them
+    #[arg(long, default_value_t = false)]
+    raise_error: bool,
+    /// Overwrite existing files
+    #[arg(long, default_value_t = false)]
+    overwrite: bool,
 }
 
 #[tokio::main]
@@ -37,78 +43,90 @@ async fn main() -> Result<(), anyhow::Error> {
         fs::create_dir(output).await?;
     }
 
-    let drawer = Arc::new(sar_core::SymbolArtDrawer::new());
+    let drawer = Draw::new(
+        Arc::new(sar_core::SymbolArtDrawer::new().with_raise_error(args.raise_error)),
+        args.overwrite,
+    );
     if input.is_dir() {
-        draw_dir(input.to_path_buf(), output.to_path_buf(), drawer.clone()).await
+        drawer.draw_dir(input, output).await
     } else {
         let output = output.join(format!(
             "{}.png",
             input.file_name().unwrap().to_string_lossy()
         ));
-        draw_file(input.to_path_buf(), output.to_path_buf(), drawer.clone()).await
+        drawer.draw_file(input, &output).await
     }
 }
 
-async fn draw_dir(
-    input_dir: PathBuf,
-    output_dir: PathBuf,
+struct Draw {
     drawer: Arc<SymbolArtDrawer>,
-) -> Result<(), anyhow::Error> {
-    let mut stream = ReadDirStream::new(tokio::fs::read_dir(input_dir).await?);
-    while let Some(entry) = stream.next().await {
-        let entry = entry?;
-        let input_path = entry.path();
-        if input_path.is_dir() || input_path.is_symlink() {
-            continue;
+    overwrite: bool,
+}
+
+impl Draw {
+    fn new(drawer: Arc<SymbolArtDrawer>, overwrite: bool) -> Self {
+        Self { drawer, overwrite }
+    }
+}
+
+impl Draw {
+    async fn draw_dir(&self, input_dir: &Path, output_dir: &Path) -> Result<(), anyhow::Error> {
+        let mut stream = ReadDirStream::new(tokio::fs::read_dir(input_dir).await?);
+        while let Some(entry) = stream.next().await {
+            let entry = entry?;
+            let input_path = entry.path();
+            if input_path.is_dir() || input_path.is_symlink() {
+                continue;
+            }
+
+            let output_file = output_dir.join(format!(
+                "{}.png",
+                input_path.file_name().unwrap().to_string_lossy()
+            ));
+
+            let _ = self
+                .draw_file(&input_path, &output_file)
+                .await
+                .inspect_err(|e| {
+                    eprintln!("failed to render: {}: {}", input_path.to_string_lossy(), e)
+                });
         }
 
-        let output_file = output_dir.join(format!(
-            "{}.png",
-            input_path.file_name().unwrap().to_string_lossy()
-        ));
-        let drawer = drawer.clone();
-        let _ = draw_file(input_path, output_file, drawer)
-            .await
-            .inspect_err(|e| eprintln!("failed to render: {}", e));
+        Ok(())
     }
 
-    Ok(())
-}
+    async fn draw_file(&self, input_file: &Path, output_file: &Path) -> anyhow::Result<()> {
+        if !input_file.is_file() {
+            bail!("input_file not found: {}", input_file.to_string_lossy())
+        }
+        if input_file
+            .extension()
+            .and_then(|ext| ext.to_str())
+            .is_some_and(|ext| ext == ".sar")
+        {
+            bail!(
+                "input_file is not a sar file: {}",
+                input_file.to_string_lossy()
+            )
+        }
+        if output_file.exists() && !self.overwrite {
+            bail!(
+                "output_file already exists: {}",
+                output_file.to_string_lossy()
+            )
+        }
 
-async fn draw_file(
-    input_file: PathBuf,
-    output_file: PathBuf,
-    drawer: Arc<SymbolArtDrawer>,
-) -> anyhow::Result<()> {
-    if !input_file.is_file() {
-        bail!("input_file not found: {}", input_file.to_string_lossy())
+        let bytes = tokio::fs::read(input_file).await?;
+        let parsed = sar_core::parse(bytes)?;
+
+        let drawer = self.drawer.clone();
+        let image = spawn_blocking(move || drawer.draw(&parsed)).await??;
+
+        let mut cursor = Cursor::new(Vec::new());
+        image.write_to(&mut cursor, image::ImageFormat::Png)?;
+
+        tokio::fs::write(output_file, cursor.into_inner()).await?;
+
+        Ok(())
     }
-    if input_file
-        .extension()
-        .and_then(|ext| ext.to_str())
-        .is_some_and(|ext| ext == ".sar")
-    {
-        bail!(
-            "input_file is not a sar file: {}",
-            input_file.to_string_lossy()
-        )
-    }
-    if output_file.exists() {
-        bail!(
-            "output_file already exists: {}",
-            output_file.to_string_lossy()
-        )
-    }
-
-    let bytes = tokio::fs::read(input_file).await?;
-    let parsed = sar_core::parse(bytes)?;
-
-    let image = spawn_blocking(move || drawer.draw(&parsed)).await??;
-
-    let mut cursor = Cursor::new(Vec::new());
-    image.write_to(&mut cursor, image::ImageFormat::Png)?;
-
-    tokio::fs::write(output_file, cursor.into_inner()).await?;
-
-    Ok(())
 }
