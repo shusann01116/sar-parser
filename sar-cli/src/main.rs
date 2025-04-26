@@ -1,13 +1,8 @@
-use anyhow::{Result, bail};
+use anyhow::bail;
 use clap::Parser;
-use core::panic;
 use sar_core::SymbolArtDrawer;
 use sar_core::renderer::draw::Drawer;
-use std::{
-    io::Cursor,
-    path::{Path, PathBuf},
-    sync::Arc,
-};
+use std::{io::Cursor, path::PathBuf, sync::Arc};
 use tokio::{fs, task::spawn_blocking};
 use tokio_stream::{StreamExt, wrappers::ReadDirStream};
 
@@ -29,15 +24,12 @@ async fn main() -> Result<(), anyhow::Error> {
     let input = std::path::Path::new(&args.input);
     let output = std::path::Path::new(&args.output);
 
+    if output.is_file() {
+        bail!("output_path already exists: {}", output.to_string_lossy())
+    }
     if !output.parent().is_some_and(|parent| parent.exists()) {
         bail!(
-            "the parent path of the output path doesn't exists: {}",
-            output.to_string_lossy()
-        )
-    }
-    if output.is_file() {
-        bail!(
-            "the output path is already exists: {}",
+            "parent path of the output_path doesn't exists: {}",
             output.to_string_lossy()
         )
     }
@@ -45,26 +37,19 @@ async fn main() -> Result<(), anyhow::Error> {
         fs::create_dir(output).await?;
     }
 
-    let input = PathType::new(input);
-    let output = PathType::new(output);
-
     let drawer = Arc::new(sar_core::SymbolArtDrawer::new());
-    match (input, output) {
-        (PathType::Directory(input), PathType::Directory(output)) => {
-            parse_dir(input, output, drawer.clone()).await
-        }
-        (PathType::File(input), PathType::Directory(output)) => {
-            let output = output.join(format!(
-                "{}.png",
-                input.file_name().unwrap().to_string_lossy()
-            ));
-            parse_file(input, output, drawer.clone()).await
-        }
-        _ => unreachable!("unreachable"),
+    if input.is_dir() {
+        draw_dir(input.to_path_buf(), output.to_path_buf(), drawer.clone()).await
+    } else {
+        let output = output.join(format!(
+            "{}.png",
+            input.file_name().unwrap().to_string_lossy()
+        ));
+        draw_file(input.to_path_buf(), output.to_path_buf(), drawer.clone()).await
     }
 }
 
-async fn parse_dir(
+async fn draw_dir(
     input_dir: PathBuf,
     output_dir: PathBuf,
     drawer: Arc<SymbolArtDrawer>,
@@ -82,32 +67,37 @@ async fn parse_dir(
             input_path.file_name().unwrap().to_string_lossy()
         ));
         let drawer = drawer.clone();
-        let _ = parse_file(input_path, output_file, drawer)
+        let _ = draw_file(input_path, output_file, drawer)
             .await
-            .inspect_err(|e| eprintln!("failed to render file: {}", e));
+            .inspect_err(|e| eprintln!("failed to render: {}", e));
     }
 
     Ok(())
 }
 
-async fn parse_file(
+async fn draw_file(
     input_file: PathBuf,
     output_file: PathBuf,
     drawer: Arc<SymbolArtDrawer>,
 ) -> anyhow::Result<()> {
     if !input_file.is_file() {
-        bail!("input_file is not a file: {}", input_file.to_string_lossy())
+        bail!("input_file not found: {}", input_file.to_string_lossy())
     }
     if input_file
         .extension()
         .and_then(|ext| ext.to_str())
         .is_some_and(|ext| ext == ".sar")
     {
-        bail!("the file is not a sar file")
+        bail!(
+            "input_file is not a sar file: {}",
+            input_file.to_string_lossy()
+        )
     }
-    if !output_file.parent().is_some_and(|parent| parent.exists()) {
-        let output_path = output_file.parent().unwrap();
-        bail!("the path doesn't exists: {}", output_path.to_string_lossy())
+    if output_file.exists() {
+        bail!(
+            "output_file already exists: {}",
+            output_file.to_string_lossy()
+        )
     }
 
     let bytes = tokio::fs::read(input_file).await?;
@@ -121,19 +111,4 @@ async fn parse_file(
     tokio::fs::write(output_file, cursor.into_inner()).await?;
 
     Ok(())
-}
-
-enum PathType {
-    File(PathBuf),
-    Directory(PathBuf),
-}
-
-impl PathType {
-    fn new(path: &Path) -> PathType {
-        match (path.is_dir(), path.is_file(), path.exists()) {
-            (true, false, true) => Self::Directory(path.to_path_buf()),
-            (false, true, true) => Self::File(path.to_path_buf()),
-            _ => panic!("not expected path: {}", path.to_string_lossy()),
-        }
-    }
 }
