@@ -4,7 +4,7 @@ use crate::{
         sa::{self, Position, SymbolArt, SymbolArtLayer},
         symbol,
     },
-    parser::decode::{self, Compression},
+    parser::decode,
 };
 
 /// Parses a byte array into a Payload structure
@@ -18,9 +18,10 @@ fn get_body(mut bytes: Box<[u8]>) -> Result<Box<[u8]>> {
     let compression = decode::validate_format(&bytes)?;
     let (_, body) = bytes.split_at_mut(4);
 
+    decode::decrypt(body);
     match compression {
-        Compression::None => Ok(Box::from(body)),
-        Compression::Compressed => decode::decompress(body),
+        decode::Compression::None => Ok(Box::from(body)),
+        decode::Compression::Compressed => decode::decompress(body),
     }
 }
 

@@ -9,7 +9,7 @@ use blowfish::{
 
 const KEY: &[u8] = &[0x09, 0x07, 0xc1, 0x2b];
 
-pub fn decompress(bytes: &mut [u8]) -> Result<Box<[u8]>> {
+pub fn decrypt(bytes: &mut [u8]) {
     // It's safe to unwrap because the key is hardcoded and known
     let cipher = BlowfishLE::new_from_slice(KEY).unwrap();
     // decrypt the maximum multiple of 8 bytes
@@ -17,6 +17,9 @@ pub fn decompress(bytes: &mut [u8]) -> Result<Box<[u8]>> {
         let block = GenericArray::from_mut_slice(block);
         cipher.decrypt_block(block);
     }
+}
+
+pub fn decompress(bytes: &mut [u8]) -> Result<Box<[u8]>> {
     // XOR every byte in the buffer with 0x95
     bytes.iter_mut().for_each(|b| *b ^= 0x95);
     // decompress the PRS
