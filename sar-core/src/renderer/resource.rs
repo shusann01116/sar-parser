@@ -74,7 +74,7 @@ impl<'a> Image<'a> {
     }
 }
 
-impl<'a> std::fmt::Debug for Image<'a> {
+impl std::fmt::Debug for Image<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Image::R(_) => write!(f, "R"),
