@@ -14,3 +14,7 @@ thiserror = "=2.0.12"
 image = "=0.25.6"
 imageproc = "=0.25.0"
 clap = { version = "=4.5.37", features = ["derive"] }
+rayon = "=1.10.0"
+anyhow = "=1.0.98"
+tokio-stream = { version = "=0.1.17", features = ["fs"] }
+tokio = { version = "=1.44.2", features = ["rt-multi-thread", "fs", "macros"] }

@@ -11,7 +11,7 @@ blowfish = { workspace = true }
 image = { workspace = true }
 thiserror = { workspace = true }
 imageproc = { workspace = true }
-rayon = "1.10.0"
+rayon = { workspace = true }
 
 [[example]]
 name = "parse"

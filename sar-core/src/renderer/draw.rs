@@ -24,6 +24,8 @@ pub struct SymbolArtDrawer {
     resource: resource::Resource,
     canvas_size: (u32, u32),
     view_size: (u32, u32),
+    chunk_size: usize,
+    supress_failure: bool,
 }
 
 impl SymbolArtDrawer {
@@ -36,6 +38,8 @@ impl SymbolArtDrawer {
             resource,
             canvas_size,
             view_size,
+            chunk_size: 10,
+            supress_failure: true,
         }
     }
 
@@ -94,6 +98,8 @@ impl Default for SymbolArtDrawer {
             resource: resource::Resource::new().unwrap(),
             canvas_size: (256, 256),
             view_size: (193, 96),
+            chunk_size: 10,
+            supress_failure: true,
         }
     }
 }
@@ -114,7 +120,7 @@ where
         let (tx, rx) = mpsc::channel();
         let mut overlays = sa
             .layers()
-            .par_chunks(20)
+            .par_chunks(self.chunk_size)
             .rev()
             .enumerate()
             .filter_map(|(i, chunk)| {
@@ -128,6 +134,10 @@ where
                     let image = match self.resource.get_image(layer.symbol().id()) {
                         Some(image) => image,
                         None => {
+                            if self.supress_failure {
+                                return None;
+                            }
+
                             tx.send(SARError::SymbolNotFound(layer.symbol().id()))
                                 .unwrap();
                             return None;
@@ -138,6 +148,10 @@ where
                     let projection = match self.get_projection(layer, scale) {
                         Ok(projection) => projection,
                         Err(e) => {
+                            if self.supress_failure {
+                                return None;
+                            }
+
                             tx.send(e).unwrap();
                             return None;
                         }

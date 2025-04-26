@@ -6,6 +6,9 @@ version.workspace = true
 authors.workspace = true
 
 [dependencies]
-anyhow = "1.0.98"
+anyhow = { workspace = true }
 clap = { workspace = true, features = ["derive"] }
+image.workspace = true
 sar-core = { path = "../sar-core" }
+tokio = { workspace = true }
+tokio-stream = { workspace = true }
