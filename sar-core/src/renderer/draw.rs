@@ -23,7 +23,6 @@ where
 pub struct SymbolArtDrawer {
     resource: resource::Resource,
     canvas_size: (u32, u32),
-    view_size: (u32, u32),
     chunk_size: usize,
     suppress_failure: bool,
 }
@@ -32,12 +31,10 @@ impl SymbolArtDrawer {
     pub fn new() -> Self {
         let resource = resource::Resource::new().unwrap();
         let canvas_size = (256, 256);
-        let view_size = (193, 96);
 
         Self {
             resource,
             canvas_size,
-            view_size,
             chunk_size: 10,
             suppress_failure: true,
         }
@@ -55,10 +52,13 @@ impl SymbolArtDrawer {
         )
     }
 
-    fn calc_view_size(&self, scale: f32) -> (u32, u32) {
+    fn calc_view_size<S>(sa: &S, scale: f32) -> (u32, u32)
+    where
+        S: SymbolArt,
+    {
         (
-            (self.view_size.0 as f32 * scale) as u32,
-            (self.view_size.1 as f32 * scale) as u32,
+            (sa.width() as f32 * scale) as u32,
+            (sa.height() as f32 * scale) as u32,
         )
     }
 
@@ -117,7 +117,6 @@ impl Default for SymbolArtDrawer {
         Self {
             resource: resource::Resource::new().unwrap(),
             canvas_size: (256, 256),
-            view_size: (193, 96),
             chunk_size: 10,
             suppress_failure: true,
         }
@@ -210,7 +209,7 @@ where
             imageops::overlay(&mut canvas, &overlay, 0, 0);
         }
 
-        let view_size = self.calc_view_size(scale);
+        let view_size = Self::calc_view_size(sa, scale);
         Ok(canvas
             .sub_image(
                 canvas_size.0 / 2 - view_size.0 / 2,

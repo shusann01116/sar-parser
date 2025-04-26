@@ -77,7 +77,7 @@ impl SymbolArt for Payload {
 
     fn height(&self) -> u8 {
         match self.header.height {
-            HEADER_SIZE_NORMAL => 192,
+            HEADER_SIZE_NORMAL => 96,
             HEADER_SIZE_TEAM_FLAG => 32,
             _ => panic!("Invalid height"),
         }
@@ -85,7 +85,7 @@ impl SymbolArt for Payload {
 
     fn width(&self) -> u8 {
         match self.header.height {
-            HEADER_SIZE_NORMAL => 192,
+            HEADER_SIZE_NORMAL => 193,
             HEADER_SIZE_TEAM_FLAG => 32,
             _ => panic!("Invalid width"),
         }
