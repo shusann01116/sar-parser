@@ -37,7 +37,7 @@ async fn main() -> Result<(), anyhow::Error> {
     }
     if output.is_file() {
         bail!(
-            "the output path is already exissts: {}",
+            "the output path is already exists: {}",
             output.to_string_lossy()
         )
     }

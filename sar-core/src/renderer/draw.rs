@@ -25,7 +25,7 @@ pub struct SymbolArtDrawer {
     canvas_size: (u32, u32),
     view_size: (u32, u32),
     chunk_size: usize,
-    supress_failure: bool,
+    suppress_failure: bool,
 }
 
 impl SymbolArtDrawer {
@@ -39,7 +39,7 @@ impl SymbolArtDrawer {
             canvas_size,
             view_size,
             chunk_size: 10,
-            supress_failure: true,
+            suppress_failure: true,
         }
     }
 
@@ -99,7 +99,7 @@ impl Default for SymbolArtDrawer {
             canvas_size: (256, 256),
             view_size: (193, 96),
             chunk_size: 10,
-            supress_failure: true,
+            suppress_failure: true,
         }
     }
 }
@@ -134,7 +134,7 @@ where
                     let image = match self.resource.get_image(layer.symbol().id()) {
                         Some(image) => image,
                         None => {
-                            if self.supress_failure {
+                            if self.suppress_failure {
                                 return None;
                             }
 
@@ -148,7 +148,7 @@ where
                     let projection = match self.get_projection(layer, scale) {
                         Ok(projection) => projection,
                         Err(e) => {
-                            if self.supress_failure {
+                            if self.suppress_failure {
                                 return None;
                             }
 
