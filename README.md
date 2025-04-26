@@ -1,3 +1,3 @@
 # sar-parser
 
-SymbolArt visualizer written in Rust
+PSO2 SymbolArt visualizer written in Rust
