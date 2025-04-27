@@ -304,12 +304,9 @@ impl Position {
 
 #[cfg(test)]
 mod tests {
-    use std::fs;
-
     use super::*;
     use crate::{
         core::sa::Position,
-        draw,
         test::{RAW_FILE, RAW_FILE_UNCOMPRESSED},
     };
 
