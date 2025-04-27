@@ -95,6 +95,10 @@ impl SymbolArt for Payload {
     fn layers(&self) -> Vec<Layer> {
         self.layers.clone()
     }
+
+    fn name(&self) -> String {
+        String::from_utf16_lossy(&self.name)
+    }
 }
 
 /// Represents the header of a SAR file containing metadata
@@ -300,8 +304,14 @@ impl Position {
 
 #[cfg(test)]
 mod tests {
+    use std::fs;
+
     use super::*;
-    use crate::{core::sa::Position, test::RAW_FILE};
+    use crate::{
+        core::sa::Position,
+        draw,
+        test::{RAW_FILE, RAW_FILE_UNCOMPRESSED},
+    };
 
     #[test]
     fn test_get_body() {
@@ -346,5 +356,17 @@ mod tests {
         assert_eq!(payload.header, expected.header);
         assert_eq!(payload.layers.len(), expected.layers.len());
         assert_eq!(payload.name, expected.name);
+    }
+
+    #[test]
+    fn test_parse_uncompressed() {
+        let bytes = Box::from(RAW_FILE_UNCOMPRESSED);
+        let body = get_body(bytes).unwrap();
+        let payload = Payload::parse(&body).unwrap();
+
+        assert_eq!(
+            payload.name,
+            vec![84, 104, 97, 110, 107, 32, 121, 111, 117, 32, 33, 33]
+        );
     }
 }

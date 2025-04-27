@@ -17,6 +17,7 @@ pub trait SymbolArt: Send + Sync {
     fn height(&self) -> u8;
     fn width(&self) -> u8;
     fn layers(&self) -> Vec<Self::Layer>;
+    fn name(&self) -> String;
 }
 
 pub trait SymbolArtLayer {
