@@ -154,7 +154,7 @@ where
                         Some(image) => image,
                         None => {
                             if self.suppress_failure {
-                                return None;
+                                continue;
                             }
 
                             tx.send(SARError::SymbolNotFound(layer.symbol().id()))
@@ -168,7 +168,7 @@ where
                         Ok(projection) => projection,
                         Err(e) => {
                             if self.suppress_failure {
-                                return None;
+                                continue;
                             }
 
                             tx.send(e).unwrap();
