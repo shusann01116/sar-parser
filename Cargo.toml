@@ -1,11 +1,17 @@
 [workspace]
 members = ["sar-cli", "sar-core"]
 resolver = "2"
+
 package.license = "MIT"
 package.version = "0.1.0"
 package.authors = [
   "shusann01116 <26602565+shusann01116@users.noreply.github.com>",
 ]
+package.homepage = "https://github.com/shusann01116/sar-rs"
+package.repository = "https://github.com/shusann01116/sar-rs"
+package.readme = "README.md"
+package.keywords = ["sar", "pso2"]
+package.exclude = ["fixture/*"]
 
 [workspace.dependencies]
 ages-prs = "=0.1.0"

@@ -1,9 +1,13 @@
 [package]
 name = "sar-core"
 edition = "2021"
+description = "Core library for SAR file format, providing parsing and rendering capabilities."
 license.workspace = true
 version.workspace = true
 authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+readme.workspace = true
 
 [dependencies]
 ages-prs = { workspace = true }
