@@ -4,7 +4,7 @@ resolver = "2"
 
 package.edition = "2024"
 package.license = "MIT"
-package.version = "0.1.0"
+package.version = "0.1.1"
 package.authors = [
   "shusann01116 <26602565+shusann01116@users.noreply.github.com>",
 ]
