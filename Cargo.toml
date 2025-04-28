@@ -2,6 +2,7 @@
 members = ["sar-cli", "sar-core"]
 resolver = "2"
 
+package.edition = "2024"
 package.license = "MIT"
 package.version = "0.1.0"
 package.authors = [

@@ -21,8 +21,15 @@ enum ImageSheet {
     Color,
 }
 
+/// A resource manager that handles image sheets for symbol rendering.
+///
+/// This struct manages multiple image sheets (R, G, B, and Color) that contain
+/// symbols used for rendering. Each sheet is stored as a DynamicImage and can be
+/// accessed to extract individual symbol images.
 pub struct Resource {
+    /// A map of image sheets, where each sheet contains a collection of symbols
     sheets: HashMap<ImageSheet, DynamicImage>,
+    /// The size of each symbol in pixels (width and height are equal)
     pub symbol_pixels: u32,
 }
 

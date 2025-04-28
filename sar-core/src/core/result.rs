@@ -1,5 +1,10 @@
 use super::symbol::SymbolId;
 
+/// A specialized Result type for SAR operations.
+///
+/// This is a type alias for `std::result::Result<T, SARError>`, providing
+/// a consistent error handling type throughout the SAR codebase. It uses
+/// `SARError` as the error type for all operations that can fail.
 pub type Result<T> = std::result::Result<T, SARError>;
 
 #[derive(thiserror::Error, Debug)]

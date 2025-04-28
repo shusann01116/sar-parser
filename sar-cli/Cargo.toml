@@ -1,6 +1,6 @@
 [package]
 name = "sar-cli"
-edition = "2024"
+edition.workspace = true
 license.workspace = true
 version.workspace = true
 authors.workspace = true

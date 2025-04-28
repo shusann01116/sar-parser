@@ -11,6 +11,10 @@ pub struct Position {
     pub y: u8,
 }
 
+/// Represents a complete SymbolArt composition
+///
+/// A SymbolArt is a user-created artwork composed of multiple layers of symbols.
+/// Each layer contains a symbol positioned and colored according to the layer's properties.
 pub trait SymbolArt: Send + Sync {
     type Layer: SymbolArtLayer + Send + Sync;
     fn author_id(&self) -> u32;
@@ -20,6 +24,12 @@ pub trait SymbolArt: Send + Sync {
     fn name(&self) -> String;
 }
 
+/// Represents a single layer in a SymbolArt composition
+///
+/// A SymbolArt is composed of multiple layers stacked on top of each other,
+/// where each layer contains a symbol positioned and colored according to the
+/// layer's properties. The order of layers determines their visual stacking
+/// order in the final composition.
 pub trait SymbolArtLayer {
     fn top_left(&self) -> Position;
     fn bottom_left(&self) -> Position;
@@ -30,6 +40,11 @@ pub trait SymbolArtLayer {
     fn is_hidden(&self) -> bool;
 }
 
+/// Represents a color in RGBA format
+///
+/// Each component (red, green, blue, alpha) is represented as an 8-bit unsigned integer,
+/// allowing for values between 0 and 255. The alpha channel controls transparency,
+/// where 0 is fully transparent and 255 is fully opaque.
 #[derive(Debug, Clone, Copy)]
 pub struct Color {
     pub a: u8,

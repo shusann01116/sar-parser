@@ -11,6 +11,7 @@ use rayon::prelude::*;
 
 use super::resource::{self};
 
+/// A trait defining the core rendering capabilities for SymbolArt compositions
 pub trait Drawer<S, L>
 where
     S: SymbolArt<Layer = L>,
@@ -20,6 +21,49 @@ where
     fn draw_with_scale(&self, sa: &S, scale: f32) -> Result<ImageBuffer<Rgba<u8>, Vec<u8>>>;
 }
 
+/// A drawer that renders SymbolArt compositions into images
+///
+/// The `SymbolArtDrawer` is responsible for converting SymbolArt compositions into
+/// raster images. It handles the rendering of individual layers, applying transformations,
+/// and compositing them into a final image.
+///
+/// # Examples
+///
+/// ```rust
+/// use sar_core::{SymbolArtDrawer, parse};
+/// use sar_core::renderer::draw::Drawer;
+///
+/// // Parse a SAR file into a SymbolArt instance
+/// let bytes = include_bytes!("../../../fixture/sa0a1d081b8a108bb8c9847c4cd83db662.sar");
+/// let symbol_art = parse(Vec::from(*bytes)).unwrap();
+///
+/// // Create a drawer and render the SymbolArt
+/// let drawer = SymbolArtDrawer::new();
+/// let image = drawer.draw(&symbol_art).unwrap();
+/// ```
+///
+/// # Configuration
+///
+/// The drawer can be configured with various options:
+/// - `with_raise_error`: Controls whether rendering errors should be raised or suppressed
+/// - Canvas size: Default is 256x256 pixels
+/// - `with_chunk_size`: Controls parallel processing of layers (default: 10)
+///
+/// # Performance
+///
+/// The drawer uses parallel processing to render layers efficiently. The chunk size
+/// can be adjusted to balance between parallelization overhead and throughput.
+///
+/// # Error Handling
+///
+/// By default, the drawer suppresses rendering errors and continues processing.
+/// This can be changed using `with_raise_error(true)` to make errors fatal.
+///
+/// # Resource Management
+///
+/// The drawer maintains a cache of symbol resources to improve rendering performance.
+/// These resources are loaded when the drawer is created and shared across all
+/// rendering operations.
 pub struct SymbolArtDrawer {
     resource: resource::Resource,
     canvas_size: (u32, u32),
@@ -42,6 +86,11 @@ impl SymbolArtDrawer {
 
     pub fn with_raise_error(mut self, raise_error: bool) -> Self {
         self.suppress_failure = !raise_error;
+        self
+    }
+
+    pub fn with_chunk_size(mut self, chunk_size: usize) -> Self {
+        self.chunk_size = chunk_size;
         self
     }
 
@@ -107,7 +156,7 @@ impl SymbolArtDrawer {
     }
 }
 
-pub enum RenderColor {
+enum RenderColor {
     Color(Color),
     None,
 }
